@@ -19,11 +19,10 @@ seed(12)
 
 
 def plot_dendrogram():
-    # Plot dendogram and cut the tree to find resulting clusters
     fig = pl.figure()
     data = np.array([[1,2,3],[1,1,1],[5,5,5]])
     datalable = ['first','second','third']
-    hClsMat = sch.linkage(data, method='complete') # Complete clustering
+    hClsMat = sch.linkage(data, method='complete')
     sch.dendrogram(hClsMat, labels= datalable, leaf_rotation = 45)
     fig.show()
     resultingClusters = sch.fcluster(hClsMat,t= 3, criterion = 'distance')
@@ -31,11 +30,6 @@ def plot_dendrogram():
 
 
 def randIndex(truth, predicted):
-    """
-    The function is to measure similarity between two label assignments
-    truth: ground truth labels for the dataset (1 x 1496)
-    predicted: predicted labels (1 x 1496)
-    """
     if len(truth) != len(predicted):
         print("different sizes of the label assignments")
         return -1
@@ -59,10 +53,10 @@ class FoodGroupData:
     def __init__(self):
         """
         self.data = {"Cereal-grains-pasta": [initial data read in], [initial x], [initial y], [min], [max], [normalized from group min/max], [normalized to all min/max]
-                     "Fats-oils": None,
-                     "Finfish-shellfish": None,
-                     "Vegetables": None,
-                     "All": [initial data read in], [initial x], [initial y], [min], [max], [normalized from group min/max]}
+                     "Fats-oils": [initial data read in], [initial x], [initial y], [min], [max], [normalized from group min/max], [normalized to all min/max],
+                     "Finfish-shellfish": [initial data read in], [initial x], [initial y], [min], [max], [normalized from group min/max], [normalized to all min/max],
+                     "Vegetables": [initial data read in], [initial x], [initial y], [min], [max], [normalized from group min/max], [normalized to all min/max],
+                     "All": [initial data read in], [initial x], [initial y], [min], [max], [normalized from group min/max], [normalized to all min/max]}
         """
         self.data = {"Cereal-grains-pasta": [[],[],[],[],[],[],[]],
                      "Fats-oils": [[],[],[],[],[],[],[]],
@@ -119,12 +113,6 @@ class FoodGroupData:
         self.data[data_flag][2] = np.array(y_data)
 
         self.data[data_flag][1] = self.data[data_flag][1].astype(np.float)
-        # self.data[data_flag][2].astype(float)
-
-        # TODO: refactor to not repeat labels several times
-        # x = [f1, f2, f3, ...]
-        # y = {filename: [start, end], filename2: [start, end]}
-        # x[i] <> y[i]
 
         self.data["All"][1: 3] = [], []
         for key in self.data.keys():
@@ -136,7 +124,6 @@ class FoodGroupData:
         self.data["All"][2] = np.array(self.data["All"][2])
 
         self.data["All"][1] = self.data["All"][1].astype(np.float)
-        # self.data["All"][2].astype(float)
 
         return
 
@@ -163,21 +150,6 @@ class FoodGroupData:
         data = self.data[data_flag][1]
         min_features = self.data[data_flag][3]
         max_features = self.data[data_flag][4]
-
-        """
-        Example:
-        X = [[10, 20, 30],
-             [90, 80, 70],
-             [50, 60, 40]]
-        
-        min = [10, 20, 30]
-        max = [90, 80, 70]
-        delta = [80, 60, 40]
-        
-        [[(10-10)/80, (20-20)/60, (30-30)/40,
-          (90-10)/80, (80-20)/60, (70-30)/40,
-          (50-10)/80, (60-20)/60, (40-30)/40]]
-        """
 
         all_normalized_data = (data - min_features) / (max_features - min_features)
 
@@ -241,7 +213,6 @@ class FoodCluster:
         label2 = np.ones(len(class2data)).__add__(np.ones(len(class2data)))
         label3 = np.ones(len(class3data)).__add__(np.ones(len(class3data))).__add__(np.ones(len(class3data)))
 
-        # np.random.choice instead of train_test_split
         x0, x, y0, y = train_test_split(class0data, label0, random_state=12, train_size=(30/len(label0)))
         x1, x, y1, y = train_test_split(class1data, label1, random_state=12, train_size=(30/len(label1)))
         x2, x, y2, y = train_test_split(class2data, label2, random_state=12, train_size=(30/len(label2)))
@@ -275,10 +246,6 @@ class FoodCluster:
         print(resultingClusters_randIndex)
 
     def try_diff_k_sizes(self, data, y_data):
-        """
-        kmeans.labels_ = [the cluster of each point at index i]
-        name_dict = {cluster_group -> list of names in the group}
-        """
         x_data = data
         k_list = [5, 10, 25, 50, 75]
 
@@ -323,8 +290,7 @@ class FoodCluster:
 
 
 def main():
-    data_path = "/Users/ldubrosa/maddie-coding/homework/machine_learning/project_5/ps5_data/"
-    # data_path = "/Users/mo/src-control/projects/kwellerprep/privates/maddie/maddie-coding/homework/machine_learning/project_5/ps5_data/"
+    data_path = ""
     files = []
     for file in os.listdir(data_path):
         if file.endswith(".txt"):
